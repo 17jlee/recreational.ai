@@ -1,0 +1,134 @@
+{
+  'transcript': 'And well, the first thing that was exciting for us was to even get a table.',
+  'confidence': 0.9951172,
+  'words': [
+    {
+      'word': 'and',
+      'start': 9.612411,
+      'end': 9.849731,
+      'confidence': 0.9941406,
+      'speaker': 1,
+      'punctuated_word': 'And'
+    },
+    {
+      'word': 'well',
+      'start': 9.849731,
+      'end': 9.928839,
+      'confidence': 0.9501953,
+      'speaker': 1,
+      'punctuated_word': 'well,'
+    },
+    {
+      'word': 'the',
+      'start': 10.007946,
+      'end': 10.166161,
+      'confidence': 0.9926758,
+      'speaker': 1,
+      'punctuated_word': 'the'
+    },
+    {
+      'word': 'first',
+      'start': 10.166161,
+      'end': 10.324374,
+      'confidence': 0.99902344,
+      'speaker': 1,
+      'punctuated_word': 'first'
+    },
+    {
+      'word': 'thing',
+      'start': 10.324374,
+      'end': 10.482589,
+      'confidence': 0.99853516,
+      'speaker': 1,
+      'punctuated_word': 'thing'
+    },
+    {
+      'word': 'that',
+      'start': 10.482589,
+      'end': 10.640803,
+      'confidence': 0.94384766,
+      'speaker': 1,
+      'punctuated_word': 'that'
+    },
+    {
+      'word': 'was',
+      'start': 10.640803,
+      'end': 10.878124,
+      'confidence': 0.9951172,
+      'speaker': 1,
+      'punctuated_word': 'was'
+    },
+    {
+      'word': 'exciting',
+      'start': 10.878124,
+      'end': 11.194553,
+      'confidence': 0.9995117,
+      'speaker': 1,
+      'punctuated_word': 'exciting'
+    },
+    {
+      'word': 'for',
+      'start': 11.194553,
+      'end': 11.352768,
+      'confidence': 0.9692383,
+      'speaker': 1,
+      'punctuated_word': 'for'
+    },
+    {
+      'word': 'us',
+      'start': 11.352768,
+      'end': 11.510982,
+      'confidence': 0.9638672,
+      'speaker': 1,
+      'punctuated_word': 'us'
+    },
+    {
+      'word': 'was',
+      'start': 11.510982,
+      'end': 11.669196,
+      'confidence': 0.98535156,
+      'speaker': 1,
+      'punctuated_word': 'was'
+    },
+    {
+      'word': 'to',
+      'start': 11.669196,
+      'end': 11.906517,
+      'confidence': 0.99902344,
+      'speaker': 1,
+      'punctuated_word': 'to'
+    },
+    {
+      'word': 'even',
+      'start': 11.906517,
+      'end': 12.302053,
+      'confidence': 0.9975586,
+      'speaker': 1,
+      'punctuated_word': 'even'
+    },
+    {
+      'word': 'get',
+      'start': 12.302053,
+      'end': 12.539374,
+      'confidence': 0.9980469,
+      'speaker': 1,
+      'punctuated_word': 'get'
+    },
+    {
+      'word': 'a',
+      'start': 12.539374,
+      'end': 12.776696,
+      'confidence': 0.97802734,
+      'speaker': 1,
+      'punctuated_word': 'a'
+    },
+    {
+      'word': 'table',
+      'start': 12.776696,
+      'end': 13.093124,
+      'confidence': 0.9975586,
+      'speaker': 1,
+      'punctuated_word': 'table.'
+    }
+  ]
+}

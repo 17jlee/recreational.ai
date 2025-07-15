@@ -1,0 +1,98 @@
+{
+  "name": "manage_mindmap",
+  "description": "Manages a mindmap by adding, removing, or modifying nodes.",
+  "strict": false,
+  "parameters": {
+    "type": "object",
+    "required": [],
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Type of operation to perform on the mindmap node",
+        "enum": [
+          "add",
+          "remove",
+          "modify",
+          "set_title"
+        ]
+      },
+      "add": {
+        "type": "object",
+        "description": "Parameters for adding a node",
+        "properties": {
+          "parent_node_id": {
+            "type": "integer",
+            "description": "ID of the parent node to which the new node will be added"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the new node"
+          },
+          "speaker_id": {
+            "type": "integer",
+            "description": "ID of the speaker associated with the new node"
+          }
+        },
+        "required": [
+          "parent_node_id",
+          "content",
+          "speaker_id"
+        ],
+        "additionalProperties": false
+      },
+      "remove": {
+        "type": "object",
+        "description": "Parameters for removing a node and its children",
+        "properties": {
+          "node_id": {
+            "type": "integer",
+            "description": "ID of the node to remove, along with its children"
+          }
+        },
+        "required": [
+          "node_id"
+        ],
+        "additionalProperties": false
+      },
+      "modify": {
+        "type": "object",
+        "description": "Parameters for modifying a node",
+        "properties": {
+          "node_id": {
+            "type": "integer",
+            "description": "ID of the node to modify"
+          },
+          "new_content": {
+            "type": "string",
+            "description": "New content for the node"
+          },
+          "speaker_id": {
+            "type": "string",
+            "description": "ID of the speaker associated with the modified node"
+          }
+        },
+        "required": [
+          "node_id",
+          "new_content",
+          "speaker_id"
+        ],
+        "additionalProperties": false
+      },
+      "set_title": {
+        "type": "object",
+        "description": "Set a new title for the mindmap",
+        "properties": {
+          "new_title": {
+            "type": "string",
+            "description": "The new title of the mindmap."
+          }
+        },
+        "required": [
+          "new_title"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  }
+}

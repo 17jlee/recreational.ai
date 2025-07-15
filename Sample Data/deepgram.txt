@@ -1,0 +1,465 @@
+This recording is from the British Council.
+['this recording is from the british council', 0]
+-------------------------
+
+-------------------------
+Hi, Jo. Hello. And thank you for talking to me today.
+[('hi jo hello', 0), ('and thank you for talking to me today', 1)]
+-------------------------
+
+-------------------------
+What would you like to talk about? So I'm going to tell you about my recent
+[("what would you like to talk about so i'm going to tell you about my recent", 1)]
+-------------------------
+
+-------------------------
+visit to a very well known restaurant
+[('visit to a very well known restaurant', 1)]
+-------------------------
+
+
+
+-------------------------
+and very special restaurant. Okay. Great.
+[('and very special restaurant okay great', 1)]
+-------------------------
+
+
+
+-------------------------
+It's called Alcea de Cambroca.
+[("it's called alcea de cambroca", 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+And it's in Girona in Spain.
+[("and it's in girona in spain", 1)]
+-------------------------
+
+
+
+
+-------------------------
+And it's it often comes in the like top
+[("and it's it often comes in the like top", 1)]
+-------------------------
+
+
+
+
+-------------------------
+two or three restaurants Wow. In the world.
+[('two or three restaurants wow in the world', 1)]
+-------------------------
+
+
+-------------------------
+And I went last week
+[('and i went last week', 1)]
+-------------------------
+
+
+
+
+-------------------------
+and well the first thing that was exciting for us was to even get a table.
+[('and well the first thing that was exciting for us was to even get a table', 1)]
+-------------------------
+
+-------------------------
+Because
+[('because', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+we booked a year ago and we had to go you have to go because you can book a year in advance
+[('we booked a year ago and we had to go you have to go because you can book a year in advance', 1)]
+-------------------------
+
+
+-------------------------
+so you have to go
+[('so you have to go', 1)]
+-------------------------
+
+
+
+
+-------------------------
+online at one minute to midnight
+[('online at one minute to midnight', 1)]
+-------------------------
+
+
+
+-------------------------
+and a year before you think you could go
+[('and a year before you think you could go', 1)]
+-------------------------
+
+
+
+-------------------------
+and keep refreshing refreshing the page until
+[('and keep refreshing refreshing the page until', 1)]
+-------------------------
+
+-------------------------
+places become
+[('places', 1), ('become', 0)]
+-------------------------
+
+
+
+
+-------------------------
+available and just go immediately and get the table. So
+[('available and just go immediately and get the table so', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+we're really excited to have the table and
+[("we're really excited to have the table and", 1)]
+-------------------------
+
+
+
+-------------------------
+and we were kind of nervous on Friday because we waited a whole year so
+[('and we were kind of nervous on friday because we waited a whole year so', 1)]
+-------------------------
+
+
+
+
+-------------------------
+expectations were really high and
+[('expectations were really high and', 1)]
+-------------------------
+
+
+
+
+-------------------------
+and it was also by chance boiling hot in Girona and it
+[('and it was also by chance boiling hot in girona and it', 1)]
+-------------------------
+-------------------------
+in the middle of a heat wave. It was
+[('in the middle of a heat wave it was', 1)]
+-------------------------
+
+
+
+-------------------------
+forty four degrees. Oh, my goodness. Then we were just
+[('forty four degrees oh my goodness then we were just', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+waiting in our hotel room. We couldn't go outside because it was too hot.
+[("waiting in our hotel room we couldn't go outside because it was too hot", 1)]
+-------------------------
+-------------------------
+And kind of
+[('and kind of', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+wondering what this this dinner was going to be like and getting all dressed up.
+[('wondering what this this dinner was going to be like and getting all dressed up', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+So yeah, we went and the
+[('so yeah we went and the', 1)]
+-------------------------
+
+
+
+
+-------------------------
+well, the place is beautiful. All I thought it would be quite
+[('well the place is beautiful all i thought it would be quite', 1)]
+-------------------------
+
+
+
+-------------------------
+it didn't really feel formal though the staff were all really friendly and they
+[("it didn't really feel formal though the staff were all really friendly and they", 1)]
+-------------------------
+
+
+
+-------------------------
+showed us like the kitchen first and it's
+[("showed us like the kitchen first and it's", 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+it's amazing because no one is stressed in the kitchen or
+[("it's amazing because no one is stressed in the kitchen or", 1)]
+-------------------------
+-------------------------
+they did a good job of pretending that they
+[('they did a good job of pretending that they', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+they weren't and they were making amazing things it looked like
+[("they weren't and they were making amazing things it looked like", 1)]
+-------------------------
+
+
+
+
+-------------------------
+Charlie and the Chocolate Factory for adults, all these little olive trees with
+[('charlie and the chocolate factory for adults all these little olive trees with', 1)]
+-------------------------
+
+
+-------------------------
+amazing like
+[('amazing like', 1)]
+-------------------------
+
+
+
+
+-------------------------
+olive kind of confections hanging from them.
+[('olive kind of confections hanging from them', 1)]
+-------------------------
+
+
+-------------------------
+And
+[('and', 1)]
+-------------------------
+
+
+-------------------------
+yeah, the whole thing was
+[('yeah the whole thing was', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+amazing. A once in a lifetime experience of
+[('amazing a once in a lifetime experience of', 1)]
+-------------------------
+
+
+
+
+-------------------------
+lots of different courses of tiny beautiful surprising
+[('lots of different courses of tiny beautiful surprising', 1)]
+-------------------------
+
+-------------------------
+things.
+[('things', 1)]
+-------------------------
+
+
+
+-------------------------
+What was the best
+[('what was the best', 2)]
+-------------------------
+
+
+
+
+-------------------------
+dish? Like it was it was all
+[('dish', 2), ('like it was it was all', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+was all amazing. But I think the the best thing for me
+[('was all amazing but i think the the best thing for me', 1)]
+-------------------------
+
+-------------------------
+was
+[('was', 1)]
+-------------------------
+
+
+
+-------------------------
+one of the desserts
+[('one of the desserts', 1)]
+-------------------------
+
+
+
+-------------------------
+I had a sheep themed
+[('i had a sheep themed', 1)]
+-------------------------
+
+
+
+
+-------------------------
+pudding. Wow. So it was all
+[('pudding', 1), ('wow', 2), ('so it was all', 1)]
+-------------------------
+
+
+
+
+-------------------------
+so it was like a woolly sheep. It was
+[('so', 2), ('it was like a woolly sheep it was', 1)]
+-------------------------
+
+
+
+-------------------------
+like candy floss like made with
+[('like candy floss like made with', 1)]
+-------------------------
+
+
+
+
+-------------------------
+like, sort of white sugar like you have at the fair.
+[('like sort of white sugar like you have at the fair', 1)]
+-------------------------
+
+
+
+
+-------------------------
+And that was supposed to represent the wool
+[('and that was supposed to represent the wool', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+and the sound of the spoon on the bowl made the sound of
+[('and the sound of the spoon on the bowl made the sound of', 1)]
+-------------------------
+
+-------------------------
+the bell
+[('the bell', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+on the sheep in the field. And then separately, I had this thing to smell
+[('on the sheep in the field and then separately i had this thing to smell', 1)]
+-------------------------
+
+
+-------------------------
+that smelled of wool
+[('that smelled of wool', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+So I was like eating this sheep wool and smelling the smell of
+[('so i was like eating this sheep wool and smelling the smell of', 1)]
+-------------------------
+
+
+
+
+-------------------------
+wool at the same time which it sounds really weird
+[('wool at the same time which it sounds really weird', 1)]
+-------------------------
+
+-------------------------
+but it was actually delicious.
+[('but it was actually delicious', 1)]
+-------------------------
+
+
+
+
+
+-------------------------
+Sounds incredible. Really was.
+[('sounds incredible really', 2), ('was', 1)]
+-------------------------
+
+-------------------------
+Amazing. Wow. Thank you for telling us about it.
+[('amazing', 1), ('wow thank you for telling us about it', 2)]
+-------------------------
+
+
+-------------------------
+It's a pleasure.
+[("it's a pleasure", 1)]
+-------------------------
+
+
+
+
+
+
+
+
+
+-------------------------
+This recording is from the British Council.
+[('this recording is from the british council', 0)]

@@ -1,0 +1,6 @@
+{
+    "content" : "This is the first node",
+    "id": 0,
+    "childNodes": [Node],
+    "speaker" : 0
+}

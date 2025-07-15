@@ -1,0 +1,51 @@
+{
+  "name": "manage_mind_map",
+  "description": "Models the actions required to create and update a mind map.",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "required": [
+      "action",
+      "node"
+    ],
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "The action to perform on the mind map, either 'add', 'remove', or 'update'."
+      },
+      "node": {
+        "type": "object",
+        "required": [
+          "id",
+          "speaker",
+          "text_content",
+          "linked_nodes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the node."
+          },
+          "speaker": {
+            "type": "number",
+            "description": "Speaker attribute associated with the node."
+          },
+          "text_content": {
+            "type": "string",
+            "description": "Text content of the node."
+          },
+          "linked_nodes": {
+            "type": "array",
+            "description": "Array of IDs of other nodes linked to this node.",
+            "items": {
+              "type": "string",
+              "description": "ID of a linked node."
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  }
+}
