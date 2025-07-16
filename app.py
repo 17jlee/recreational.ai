@@ -3,6 +3,7 @@ eventlet.monkey_patch()
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+from flask import Flask, send_from_directory
 import websocket
 import threading
 import json
@@ -10,6 +11,8 @@ import os
 import mindmap
 import gptTools
 import mindmapMethods
+
+app2 = Flask(__name__, static_folder='my-react-app/build')
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -166,6 +169,7 @@ connect_to_deepgram()
 
 @app.route("/")
 def index():
+    #return send_from_directory(app2.static_folder, 'index.html')
     return render_template("newIndex.html")
 
 @socketio.on("audio_chunk")
