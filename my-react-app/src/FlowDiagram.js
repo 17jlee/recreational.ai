@@ -62,7 +62,7 @@ function FlowDiagram() {
 
       const newNode = {
         id: message.id, // unique id
-        type: 'custom',    // or 'input', 'custom', etc. React Flow built-in types are 'input', 'default', 'output'
+        type: 'default',    // or 'input', 'custom', etc. React Flow built-in types are 'input', 'default', 'output'
         data: { label: message.label },
         position: { x: message.x || 100, y: message.y || 100 },
       };
@@ -72,10 +72,11 @@ function FlowDiagram() {
       console.log('Adding node:', newNode);
 
       if (message.connectTo) {
+        console.log(`e${message.connectTo}-${message.id}`);
         const newEdge = {
-          id: `e${message.connectTo}-${message.nodeId}`,
+          id: `e${message.connectTo}-${message.id}`,
           source: message.connectTo,
-          target: message.nodeId,
+          target: message.id,
         };
 
         setEdges((eds) => [...eds, newEdge]);

@@ -15,6 +15,7 @@ wss.on('connection', (ws) => {
       label: `Node ${count}`,
       x: 100 + count * 30,
       y: 100 + count * 20,
+      connectTo: '1',
     };
     ws.send(JSON.stringify(message));
     count++;
