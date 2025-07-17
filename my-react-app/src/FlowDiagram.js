@@ -1,6 +1,8 @@
 // src/FlowDiagram.js
 import React, { useCallback, useEffect, useRef } from 'react';
 import { layoutNodes } from './layout';
+import MicButton from './MicButton';
+
 
 import ReactFlow, {
   addEdge,
@@ -100,7 +102,10 @@ function FlowDiagram() {
   );
 
   return (
-    <div style={{ width: '100%', height: '100vh' }}>
+
+    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+        <MicButton onClick={() => console.log('Microphone button clicked')} />
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -114,6 +119,8 @@ function FlowDiagram() {
         <Controls />
         <Background color="#aaa" gap={16} />
       </ReactFlow>
+
+
     </div>
   );
 }
