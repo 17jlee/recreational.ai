@@ -1,13 +1,6 @@
 // src/FlowDiagram.js
-//import CustomNode from './CustomNode';
-import React, { useCallback } from 'react';
-import { useEffect } from 'react';
-
-
-
-
-
-//const nodeTypes = { custom: CustomNode };
+import React, { useCallback, useEffect, useRef } from 'react';
+import { layoutNodes } from './layout';
 
 import ReactFlow, {
   addEdge,
@@ -20,7 +13,7 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 
-import CustomNode from './CustomNode'; // <== also here if you're using it
+import CustomNode from './CustomNode';
 const nodeTypes = { custom: CustomNode };
 
 const initialNodes = [
@@ -42,8 +35,8 @@ const initialEdges = [
     id: 'e1-2',
     source: '1',
     target: '2',
-    animated: false, // optional — default is false
-    style: { stroke: 'black' }, // optional: customize color
+    animated: false,
+    style: { stroke: 'black' },
   },
 ];
 
@@ -51,41 +44,55 @@ function FlowDiagram() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+  // Refs to track current state (avoid stale closures)
+  const nodesRef = useRef(nodes);
+  const edgesRef = useRef(edges);
+
   useEffect(() => {
-  const socket = new WebSocket('ws://localhost:1234');
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+  }, [nodes, edges]);
 
-  socket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    console.log('Received node data:', message);
+  useEffect(() => {
+    const socket = new WebSocket('ws://localhost:1234');
 
-    if (message.type === 'add_node') {
+    socket.onmessage = async (event) => {
+      const message = JSON.parse(event.data);
+      console.log('Received node data:', message);
 
-      const newNode = {
-        id: message.id, // unique id
-        type: 'default',    // or 'input', 'custom', etc. React Flow built-in types are 'input', 'default', 'output'
-        data: { label: message.label },
-        position: { x: message.x || 100, y: message.y || 100 },
-      };
+      if (message.type === 'add_node') {
+        const edgeId = `e${message.connectTo}-${message.id}`;
 
+        // Only add node if it's not already in the list
+        if (!nodesRef.current.some((n) => n.id === message.id)) {
+          const newNode = {
+            id: message.id,
+            data: { label: message.label },
+            position: { x: 0, y: 0 },
+          };
 
-      setNodes((nds) => [...nds, newNode]);
-      console.log('Adding node:', newNode);
+          const updatedNodes = [...nodesRef.current, newNode];
+          let updatedEdges = [...edgesRef.current];
 
-      if (message.connectTo) {
-        console.log(`e${message.connectTo}-${message.id}`);
-        const newEdge = {
-          id: `e${message.connectTo}-${message.id}`,
-          source: message.connectTo,
-          target: message.id,
-        };
+          if (message.connectTo && !edgesRef.current.some(e => e.id === edgeId)) {
+            updatedEdges.push({
+              id: edgeId,
+              source: message.connectTo,
+              target: message.id,
+              style: { stroke: 'black' },
+            });
+          }
 
-        setEdges((eds) => [...eds, newEdge]);
+          const laidOut = await layoutNodes(updatedNodes, updatedEdges);
+
+          setEdges(updatedEdges);
+          setNodes(laidOut);
+        }
       }
-    }
-  };
+    };
 
-  return () => socket.close(); // Clean up on unmount
-}, [setNodes, setEdges]);
+    return () => socket.close();
+  }, [setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -110,8 +117,5 @@ function FlowDiagram() {
     </div>
   );
 }
-
-
-
 
 export default FlowDiagram;
