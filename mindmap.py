@@ -127,6 +127,7 @@ class MindMap :
         else :
             self.add_child_to_id(parentID, newNode)
         self.currentID+=1
+        return newNode.id
         
 
 

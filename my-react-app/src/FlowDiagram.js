@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { layoutNodes } from './layout';
 import MicButton from './MicButton';
+import { io } from "socket.io-client";
 
 
 import ReactFlow, {
@@ -22,24 +23,19 @@ const initialNodes = [
   {
     id: '1',
     type: 'input',
-    data: { label: 'Hello Node' },
+    data: { label: 'Initial Node' },
     position: { x: 100, y: 100 },
-  },
-  {
-    id: '2',
-    data: { label: 'Goodbye Node' },
-    position: { x: 300, y: 200 },
   },
 ];
 
 const initialEdges = [
-  {
-    id: 'e1-2',
-    source: '1',
-    target: '2',
-    animated: false,
-    style: { stroke: 'black' },
-  },
+  // {
+  //   id: 'e1-2',
+  //   source: '1',
+  //   target: '2',
+  //   animated: false,
+  //   style: { stroke: 'black' },
+  // },
 ];
 
 function FlowDiagram() {
@@ -56,21 +52,21 @@ function FlowDiagram() {
   }, [nodes, edges]);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:1234');
+    const socket = io("http://localhost:2500"); // Use http, not ws
 
-    socket.onmessage = async (event) => {
-      const message = JSON.parse(event.data);
+    socket.on("node_instruction", async (message) => {
       console.log('Received node data:', message);
 
-      if (message.type === 'add_node') {
+      if (message.action === 'add') {
         const edgeId = `e${message.connectTo}-${message.id}`;
 
         // Only add node if it's not already in the list
         if (!nodesRef.current.some((n) => n.id === message.id)) {
+          console.log('Received node message:', message.content);
           const newNode = {
             id: message.id,
-            data: { label: message.label },
-            position: { x: 0, y: 0 },
+            data: { label: message.content },
+            position: { x: 0, y: 0 }, 
           };
 
           const updatedNodes = [...nodesRef.current, newNode];
@@ -91,10 +87,14 @@ function FlowDiagram() {
           setNodes(laidOut);
         }
       }
-    };
 
-    return () => socket.close();
-  }, [setNodes, setEdges]);
+
+
+
+    });
+
+  return () => socket.disconnect();
+}, [setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),

@@ -12,7 +12,7 @@ wss.on('connection', (ws) => {
     const message = {
       type: 'add_node',
       id: `node-${count}`,
-      label: `Node ${count}`,
+      content: `Node ${count}`,
       x: 100 + count * 30,
       y: 100 + count * 20,
       connectTo: '1',

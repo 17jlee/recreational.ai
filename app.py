@@ -1,6 +1,8 @@
 import eventlet
 eventlet.monkey_patch()
 
+import random
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
@@ -51,46 +53,46 @@ def handle_gpt_response(action):
 
     if None:
         print("no action required")
-    elif isinstance(action, mindmapMethods.addNodeAction):
-        currentMindmap.addNode(action.content, action.speakerID, action.parentID)
-        
-        #add
-
+    elif isinstance(action, mindmapMethods.addNodeAction): #add
+        newID = currentMindmap.addNode(action.content, action.speakerID, action.parentID)
+       
         socketio.emit("node_instruction", {
-            "transcript": action.content,
-            "gpt_response": action.content
+            "action": "add",
+            "content": action.content,
+            "speakerID": action.speakerID,
+            "parentID": action.parentID,
+            #"id": newID,
+            "id": str(random.randint(1000, 9999)),  # Temporary ID for frontend
+            "connectTo": '1', #temp
         })
-    elif isinstance(action, mindmapMethods.deleteNodeAction):
-        #delete
+
+    elif isinstance(action, mindmapMethods.deleteNodeAction):#delete
+        
         currentMindmap.delete_by_id(action.nodeID)
 
-        response_payload = {
-            "type": "delete",
-            "content": action.nodeID
-        }
+        socketio.emit("node_instruction", {
+            "action": "delete",
+            "parentID": action.nodeID
+        })
 
-        socketio.emit("node_instruction", action.nodeID)
-    elif isinstance(action, mindmapMethods.modifyNodeAction):
+    elif isinstance(action, mindmapMethods.modifyNodeAction):#modify
         currentMindmap.modify_by_id(action.newContent, action.newSpeakerID, action.nodeID)
 
-        response_payload = {
-            "type": "modify",
-            "content": action.newContent
-        }
+        socketio.emit("node_instruction", {
+            "action": "modify",
+            "newContent": action.newContent,
+            "newSpeakerID": action.newSpeakerID,
+            "nodeID": action.nodeID
+        })
+        
 
-        socketio.emit("node_instruction", action.newContent)
-        #modify
-    elif isinstance(action, mindmapMethods.setTitle):
+    elif isinstance(action, mindmapMethods.setTitle): #settitle
         currentMindmap.title = action.newTitle
-
-
-        response_payload = {
-            "type": "set_title",
-            "content": action.newTitle
-        }
-
-        socketio.emit("node_instruction", action.newTitle)
-        #settitle
+        socketio.emit("node_instruction", {
+            "action": "setTitle",
+            "newTitle": action.newTitle
+        })
+       
     else :
         print("unknown action")
 
