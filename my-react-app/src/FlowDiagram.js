@@ -21,7 +21,7 @@ const nodeTypes = { custom: CustomNode };
 
 const initialNodes = [
   {
-    id: '1',
+    id: '0',
     type: 'input',
     data: { label: 'Initial Node' },
     position: { x: 100, y: 100 },
@@ -57,38 +57,68 @@ function FlowDiagram() {
     socket.on("node_instruction", async (message) => {
       console.log('Received node data:', message);
 
-      if (message.action === 'add') {
-        const edgeId = `e${message.connectTo}-${message.id}`;
+      switch (message.action) {
+        case 'add' :
+          const edgeId = `e${message.connectTo}-${message.id}`;
 
-        // Only add node if it's not already in the list
-        if (!nodesRef.current.some((n) => n.id === message.id)) {
-          console.log('Received node message:', message.content);
-          const newNode = {
-            id: message.id,
-            data: { label: message.content },
+          // Only add node if it's not already in the list
+          if (!nodesRef.current.some((n) => n.id === message.id)) {
+            console.log('Received node message:', message.content);
+            const newNode = {
+              id: message.id,
+              data: { label: message.content },
+              position: { x: 0, y: 0 }, 
+            };
+
+            const updatedNodes = [...nodesRef.current, newNode];
+            let updatedEdges = [...edgesRef.current];
+
+            if (message.connectTo && !edgesRef.current.some(e => e.id === edgeId)) {
+              updatedEdges.push({
+                id: edgeId,
+                source: message.connectTo,
+                target: message.id,
+                style: { stroke: 'black' },
+              });
+            }
+
+            const laidOut = await layoutNodes(updatedNodes, updatedEdges);
+
+            setEdges(updatedEdges);
+            setNodes(laidOut);
+          }
+          break;
+
+        case 'delete':
+          // Remove the node with id = message.parentID
+          console.log('Deleting node with ID:', message.parentID);
+          const nodeIdToDelete = String(message.parentID);
+          const filteredNodes = nodesRef.current.filter(n => n.id !== nodeIdToDelete);
+          // Remove edges connected to the deleted node
+          const filteredEdges = edgesRef.current.filter(
+            e => e.source !== nodeIdToDelete && e.target !== nodeIdToDelete
+          );
+          setNodes(filteredNodes);
+          setEdges(filteredEdges);
+          break;
+
+        case 'modify':
+          // Update the node with id = message.id
+          console.log('Modifying node with ID:', message.nodeID);
+          const updatedNode = {
+            id: String(message.nodeID),
+            data: { label: message.newContent },
             position: { x: 0, y: 0 }, 
           };
 
-          const updatedNodes = [...nodesRef.current, newNode];
-          let updatedEdges = [...edgesRef.current];
-
-          if (message.connectTo && !edgesRef.current.some(e => e.id === edgeId)) {
-            updatedEdges.push({
-              id: edgeId,
-              source: message.connectTo,
-              target: message.id,
-              style: { stroke: 'black' },
-            });
+          const existingNodeIndex = nodesRef.current.findIndex(n => n.id === String(message.nodeID));
+          if (existingNodeIndex !== -1) {
+            const updatedNodesList = [...nodesRef.current];
+            updatedNodesList[existingNodeIndex] = updatedNode;
+            setNodes(updatedNodesList);
           }
-
-          const laidOut = await layoutNodes(updatedNodes, updatedEdges);
-
-          setEdges(updatedEdges);
-          setNodes(laidOut);
-        }
+          break;
       }
-
-
 
 
     });

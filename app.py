@@ -59,11 +59,9 @@ def handle_gpt_response(action):
         socketio.emit("node_instruction", {
             "action": "add",
             "content": action.content,
-            "speakerID": action.speakerID,
-            "parentID": action.parentID,
-            #"id": newID,
-            "id": str(random.randint(1000, 9999)),  # Temporary ID for frontend
-            "connectTo": '1', #temp
+            "speakerID": str(action.speakerID),
+            "connectTo": str(action.parentID),
+            "id": str(newID),  # Temporary ID for frontend
         })
 
     elif isinstance(action, mindmapMethods.deleteNodeAction):#delete
