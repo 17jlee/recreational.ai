@@ -118,6 +118,25 @@ function FlowDiagram() {
             setNodes(updatedNodesList);
           }
           break;
+
+        case 'setTitle':
+        // Update the node with id = message.id
+          console.log('Setting Title Node', message.nodeID);
+          const titleNode = {
+            id: '0',
+            data: { label: message.newTitle },
+            position: { x: 0, y: 0 }, 
+          };
+
+          const titleNodeIndex = nodesRef.current.findIndex(n => n.id === '0');
+          if (titleNodeIndex !== -1) {
+            const newNodesList = [...nodesRef.current];
+            newNodesList[titleNodeIndex] = titleNode;
+            setNodes(newNodesList);
+          }
+          break;
+
+
       }
 
 
