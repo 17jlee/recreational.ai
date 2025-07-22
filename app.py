@@ -1,8 +1,6 @@
 import eventlet
 eventlet.monkey_patch()
 
-import random
-
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
@@ -28,6 +26,7 @@ currentMindmap = mindmap.MindMap("")
 
 # def chatGPTWrapper(content, personID) :
 
+currentTranscript = ""
 
 def chatGPTWrapper(speechList, punctuatedSpeech, mindmap: mindmap.MindMap, callback=None):
     try:
@@ -102,12 +101,15 @@ def handle_gpt_response(action):
 def connect_to_deepgram():
     global dg_ws
     global currentMindmap
+    #global currentTranscript
 
     headers = {
         "Authorization": f"Token {DEEPGRAM_API_KEY}"
     }
 
     def on_message(ws, message):
+        global currentTranscript
+
         data = json.loads(message)
         if "channel" in data:
             transcript = data["channel"]["alternatives"][0]["transcript"]
@@ -132,11 +134,13 @@ def connect_to_deepgram():
                 # print(data)
                 print(transcript)
                 print(speechList)
+                #print(currentTranscript, )
+                currentTranscript += transcript + " "
                 print("-------------------------")
 
                 threading.Thread(
                 target=chatGPTWrapper,
-                args=(str(speechList), "", currentMindmap, handle_gpt_response),
+                args=(str(speechList), str(currentTranscript), currentMindmap, handle_gpt_response),
                 daemon=True
                 ).start()
 
