@@ -4,6 +4,7 @@ eventlet.monkey_patch()
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
+from dotenv import load_dotenv
 import websocket
 import threading
 import json
@@ -12,20 +13,18 @@ import mindmap
 import gptTools
 import mindmapMethods
 
-app2 = Flask(__name__, static_folder='my-react-app/build')
+load_dotenv()  # Load variables from .env
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-DEEPGRAM_API_KEY = "6e85a7a5f06a649ea729ebc388767458a737d45a"
+DEEPGRAM_API_KEY = os.getenv("API_KEY")
+
 DG_WS_ENDPOINT = f"wss://api.deepgram.com/v1/listen?punctuate=true&diarize=true&model=nova-3"
 
 dg_ws = None
 
 currentMindmap = mindmap.MindMap("")
-
-# def chatGPTWrapper(content, personID) :
-
 currentTranscript = ""
 
 def chatGPTWrapper(speechList, punctuatedSpeech, mindmap: mindmap.MindMap, callback=None):
