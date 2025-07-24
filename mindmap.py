@@ -6,6 +6,7 @@ class Node:
         self.id = int(id)
         self.speaker = int(speaker)
         self.childNodes = []
+
     
     def modify(self, content, speaker) :
         self.content = str(content)
@@ -53,6 +54,10 @@ class MindMap :
         self.childNodes = []
         self.id = 0
         self.currentID = 1
+        self.currentTranscript = ""
+
+    def updateTranscript(self, newText) :
+        self.currentTranscript += str(newText) + " "
 
     def addChild(self, childNode) :
         self.childNodes.append(childNode)

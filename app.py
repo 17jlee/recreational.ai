@@ -12,6 +12,9 @@ import os
 import mindmap
 import gptTools
 import mindmapMethods
+import queue
+import threading
+import deepgramProcessing
 
 load_dotenv()  # Load variables from .env
 
@@ -24,35 +27,44 @@ DG_WS_ENDPOINT = f"wss://api.deepgram.com/v1/listen?punctuate=true&diarize=true&
 
 dg_ws = None
 
+task_queue = queue.Queue()
 currentMindmap = mindmap.MindMap("")
-currentTranscript = ""
 
-def chatGPTWrapper(speechList, punctuatedSpeech, mindmap: mindmap.MindMap, callback=None):
+def gpt_worker():
+    while True:
+        speechList, transcript, currentMindmap = task_queue.get()
+        currentMindmap.updateTranscript(str(transcript)) # Only here!
+        chatGPTWrapper(speechList, currentMindmap, handle_gpt_response)
+        task_queue.task_done()
+      
+threading.Thread(target=gpt_worker, daemon=True).start()
+
+def chatGPTWrapper(speechList, mindmap: mindmap.MindMap, callback=None):
     try:
-        action = gptTools.GPTCall(speechList, punctuatedSpeech, mindmap)
+        action = gptTools.GPTCall(speechList, mindmap.currentTranscript, mindmap)
 
         if action == None :
             print("action error")
         else :
             if callback:
-                callback(action)  # <- pass both if needed
+                callback(action, mindmap)  # <- pass both if needed
 
     except Exception as e:
         print("GPT Error:", e)
 
-def handle_gpt_response(action):
-    global currentMindmap
+def handle_gpt_response(action, mindmap: mindmap.MindMap):
+    # global currentMindmap
     """
     Handle the GPT response after it returns from OpenAI.
     You can emit to frontend, log, or trigger other backend logic here.
     """
-    print(currentMindmap.to_json())
+    print(mindmap.to_json())
 
 
     if None:
         print("no action required")
     elif isinstance(action, mindmapMethods.addNodeAction): #add
-        newID = currentMindmap.addNode(action.content, action.speakerID, action.parentID)
+        newID = mindmap.addNode(action.content, action.speakerID, action.parentID)
        
         socketio.emit("node_instruction", {
             "action": "add",
@@ -64,7 +76,7 @@ def handle_gpt_response(action):
 
     elif isinstance(action, mindmapMethods.deleteNodeAction):#delete
         
-        currentMindmap.delete_by_id(action.nodeID)
+        mindmap.delete_by_id(action.nodeID)
 
         socketio.emit("node_instruction", {
             "action": "delete",
@@ -72,7 +84,7 @@ def handle_gpt_response(action):
         })
 
     elif isinstance(action, mindmapMethods.modifyNodeAction):#modify
-        currentMindmap.modify_by_id(action.newContent, action.newSpeakerID, action.nodeID)
+        mindmap.modify_by_id(action.newContent, action.newSpeakerID, action.nodeID)
 
         socketio.emit("node_instruction", {
             "action": "modify",
@@ -83,7 +95,7 @@ def handle_gpt_response(action):
         
 
     elif isinstance(action, mindmapMethods.setTitle): #settitle
-        currentMindmap.title = action.newTitle
+        mindmap.title = action.newTitle
         socketio.emit("node_instruction", {
             "action": "setTitle",
             "newTitle": action.newTitle
@@ -107,41 +119,21 @@ def connect_to_deepgram():
     }
 
     def on_message(ws, message):
-        global currentTranscript
 
         data = json.loads(message)
         if "channel" in data:
-            transcript = data["channel"]["alternatives"][0]["transcript"]
-            wordContent = data["channel"]["alternatives"][0]["words"]
+            punctuatedText = data["channel"]["alternatives"][0]["transcript"]
+            rawWords = data["channel"]["alternatives"][0]["words"]
 
-            
-            if transcript:
-                speechList = [(wordContent[0]["word"], int(wordContent[0]["speaker"]))]
-                lastSpeaker = int(wordContent[0]["speaker"])
+            if punctuatedText:
+                rawSpeechList = deepgramProcessing.rawWordProcess(rawWords)
 
-                for x in wordContent[1:] :
-
-                    if lastSpeaker == int(x["speaker"]) : # same speaker
-                        currentString = speechList[-1][0]
-                        newString = currentString + " " + x["word"]
-                        speechList[-1] = (newString, int(x["speaker"]))
-                        lastSpeaker = int(x["speaker"])
-                    else : #new speaker
-                        speechList.append((x["word"], int(x["speaker"])))
-                        lastSpeaker = int(x["speaker"])
                 print("-------------------------")
-                # print(data)
-                print(transcript)
-                print(speechList)
-                #print(currentTranscript, )
-                currentTranscript += transcript + " "
+                print(punctuatedText)
+                print(rawSpeechList)
                 print("-------------------------")
 
-                threading.Thread(
-                target=chatGPTWrapper,
-                args=(str(speechList), str(currentTranscript), currentMindmap, handle_gpt_response),
-                daemon=True
-                ).start()
+                task_queue.put((str(rawSpeechList), punctuatedText, currentMindmap))
 
 
                 # Optionally send to client:
