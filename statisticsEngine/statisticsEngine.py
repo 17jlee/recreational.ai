@@ -14,9 +14,6 @@ Whenever asked about a topic, you will:
 4. Return results using the manage_mindmap tool with add, each with:
    • a short “statistic” (number + units),
    • a one‑sentence “description”,
-   • a “source” URL,
-   • a “retrieved_date” (YYYY‑MM‑DD),
-   • an optional “confidence” score (0.0–1.0).
    - speaker ID -41.
 If you can’t find reliable data, respond with an empty “results” array."""
 
@@ -24,20 +21,13 @@ mindmap_tool = [{
   "type": "function",
   "name": "manage_mindmap",
   "description": "Manages a mindmap by adding, removing, or modifying nodes.",
-  "strict": False,
   "parameters": {
     "type": "object",
-    "required": [],
     "properties": {
       "action": {
         "type": "string",
         "description": "Type of operation to perform on the mindmap node",
-        "enum": [
-          "add",
-          "remove",
-          "modify",
-          "set_title"
-        ]
+        "enum": ["add"]
       },
       "add": {
         "type": "object",
@@ -56,70 +46,15 @@ mindmap_tool = [{
             "description": "ID of the speaker associated with the new node"
           }
         },
-        "required": [
-          "parent_node_id",
-          "content",
-          "speaker_id"
-        ],
-        "additionalProperties": False
-      },
-      "remove": {
-        "type": "object",
-        "description": "Parameters for removing a node and its children",
-        "properties": {
-          "node_id": {
-            "type": "integer",
-            "description": "ID of the node to remove, along with its children"
-          }
-        },
-        "required": [
-          "node_id"
-        ],
-        "additionalProperties": False
-      },
-      "modify": {
-        "type": "object",
-        "description": "Parameters for modifying a node",
-        "properties": {
-          "node_id": {
-            "type": "integer",
-            "description": "ID of the node to modify"
-          },
-          "new_content": {
-            "type": "string",
-            "description": "New content for the node"
-          },
-          "speaker_id": {
-            "type": "string",
-            "description": "ID of the speaker associated with the modified node"
-          }
-        },
-        "required": [
-          "node_id",
-          "new_content",
-          "speaker_id"
-        ],
-        "additionalProperties": False
-      },
-      "set_title": {
-        "type": "object",
-        "description": "Set a new title for the mindmap",
-        "properties": {
-          "new_title": {
-            "type": "string",
-            "description": "The new title of the mindmap."
-          }
-        },
-        "required": [
-          "new_title"
-        ],
+        "required": ["parent_node_id", "content", "speaker_id"],
         "additionalProperties": False
       }
-
     },
+    "required": ["action", "add"],
     "additionalProperties": False
   }
-}, {"type": "web_search_preview"}]
+}
+ , {"type": "web_search_preview"}]
 
 sampleMap = """{
   "title": "Renewable Energy - Team Meeting",
@@ -188,6 +123,12 @@ sampleMap = """{
   ]
 }"""
 
+class addNodeAction():
+    def __init__(self, content, speakerID, parentID):
+        self.content = str(content)
+        self.speakerID = int(speakerID)
+        self.parentID = int(parentID)
+
 def GPTCall(mindmapJSON) :
     try :
         response = client.responses.create(
@@ -199,15 +140,21 @@ def GPTCall(mindmapJSON) :
         tools=mindmap_tool
     )
         argumment = response.output[0].arguments
-        instruction = json.loads(argumment)
+        
     
     except Exception as e:
         print("Error in GPT call:", e)
 
     try:
+        instruction = json.loads(argumment)
         print("GPT Response:", instruction)
+        instruction = json.loads(argumment)
+        if "action" not in instruction or instruction["action"] != "add":
+            print("Invalid action in GPT response")
+            return None
+        else :
+            if instruction["action"] == "add" :
+             return (addNodeAction(instruction["add"]["content"], instruction["add"]["speaker_id"], instruction["add"]["parent_node_id"]))
 
     except json.decoder.JSONDecodeError :
         return None
-
-GPTCall()

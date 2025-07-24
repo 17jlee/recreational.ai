@@ -1,6 +1,6 @@
 import eventlet
 eventlet.monkey_patch()
-
+import sys
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
@@ -16,6 +16,12 @@ import queue
 import threading
 import deepgramProcessing
 
+from statisticsEngine import statisticsEngine as statisticsGPTEngine
+
+statistics_queue = queue.Queue()
+mindmap_lock = threading.Lock()
+speech_timeout_timer = None
+
 load_dotenv()  # Load variables from .env
 
 app = Flask(__name__)
@@ -30,6 +36,40 @@ dg_ws = None
 task_queue = queue.Queue()
 currentMindmap = mindmap.MindMap("")
 
+def statisticsEngine():
+    with mindmap_lock:
+        print("No speech detected for 1 second. Running statisticsEngine...")
+        try:
+            result = statisticsGPTEngine.GPTCall(currentMindmap.to_json())
+            print("Statistics Engine Result:", result.content)
+            if True:
+                newID = currentMindmap.addNode(result.content, result.speakerID, result.parentID)
+                print("Socketio emit")
+
+                socketio.emit("node_instruction", {
+                    "action": "add",
+                    "content": "statisticsEngine: " + result.content,
+                    "speakerID": str(result.speakerID),
+                    "connectTo": str(result.parentID),
+                    "id": str(newID),  # Temporary ID for frontend
+                })
+
+        except Exception as e:
+            print("Statistics Engine Error:", e)
+
+def statistics_worker():
+    while True:
+        statistics_queue.get()
+        statisticsEngine()
+        statistics_queue.task_done()
+
+def reset_speech_timer():
+    global speech_timeout_timer
+    if speech_timeout_timer is not None:
+        speech_timeout_timer.cancel()
+    speech_timeout_timer = threading.Timer(5.0, lambda: statistics_queue.put(True))
+    speech_timeout_timer.start()
+
 def gpt_worker():
     while True:
         speechList, transcript, currentMindmap = task_queue.get()
@@ -38,6 +78,7 @@ def gpt_worker():
         task_queue.task_done()
       
 threading.Thread(target=gpt_worker, daemon=True).start()
+threading.Thread(target=statistics_worker, daemon=True).start()
 
 def chatGPTWrapper(speechList, mindmap: mindmap.MindMap, callback=None):
     try:
@@ -126,6 +167,7 @@ def connect_to_deepgram():
             rawWords = data["channel"]["alternatives"][0]["words"]
 
             if punctuatedText:
+                reset_speech_timer()
                 rawSpeechList = deepgramProcessing.rawWordProcess(rawWords)
                 print("-------------------------")
                 print(punctuatedText)
