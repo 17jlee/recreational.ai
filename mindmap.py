@@ -56,6 +56,16 @@ class MindMap :
         self.currentID = 1
         self.currentTranscript = ""
 
+    def getAllChildNodes(id, self) :
+        if id == 0 :
+            return self.childNodes
+        else :
+            node = self.find_by_id(id)
+            if node:
+                return node.childNodes
+            else:
+                raise NameError("Node ID not found.")
+
     def updateTranscript(self, newText) :
         self.currentTranscript += str(newText) + " "
 
@@ -136,28 +146,6 @@ class MindMap :
         
 
 
-# mindmap = MindMap("British Council Recording")
-# json_output = mindmap.to_json()
-# print(json_output)
-
-
-
-# while True :
-#     a = str(input("content: "))
-#     b = int(input("speaker: "))
-#     c = int(input("parentID: "))
-#     try :
-#         mindmap.addNode(a,b,c)
-#     except NameError as error :
-#         print(error)
-#     except ValueError as error :
-#         print(error)
-#     else :
-#         print("success")
-#         json_output = mindmap.to_json()
-#         print(json_output)
-
-    
 
 
 

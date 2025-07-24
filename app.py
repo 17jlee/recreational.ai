@@ -127,12 +127,10 @@ def connect_to_deepgram():
 
             if punctuatedText:
                 rawSpeechList = deepgramProcessing.rawWordProcess(rawWords)
-
                 print("-------------------------")
                 print(punctuatedText)
                 print(rawSpeechList)
                 print("-------------------------")
-
                 task_queue.put((str(rawSpeechList), punctuatedText, currentMindmap))
 
 
