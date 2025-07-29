@@ -228,6 +228,11 @@ To change the mindmap's title, use the set_title action instead.
 **IMPORTANT REMINDER OF PURPOSE AND GOAL**
 Important: After every new input, always review and streamline the mindmap structure to maximize conciseness and clarity. All actions must use the manage_mindmap tool exclusively; produce no output text.
 
+**MOST IMPORTANT REMINDER TO KEEP IN MIND: ABOVE ALL ELSE**
+MAKE SURE NODES WITH ANY RELATION TO PRE-EXISTING NODES ARE CONNECTED TOGETHER - ALWAYS ADD NEW NODES AS CHILD NODES OF THE HIGHEST ID EXISTING NODES, NEVER AS ROOT NODES.
+The depth of a mindmap is the number of child nodes in child nodes, your goal is to have the highest depth possible whilst maintaining a minimum of 4 child nodes for each node, so always add new nodes as children of the highest ID existing nodes if we have exhausted the 4 child nodes of the current node.
+
+
 **Reminder**: The main objective is to maintain a mindmap that is always current, concise, and relevant by adding, modifying, or deleting nodes exclusively through tool calls, with a thorough review at each update. New topics should be added as root nodes, not deleted, even if they are not immediately relevant."""
 
 mindmap_tool = [{
