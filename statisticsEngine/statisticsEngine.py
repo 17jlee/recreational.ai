@@ -15,7 +15,7 @@ Whenever asked about a topic, you will:
    • a short “statistic” (number + units),
    • a one‑sentence “description”,
    - speaker ID -41.
-If you can’t find reliable data, respond with an empty “results” array."""
+If you can’t find reliable data, respond with an empty “results” array. Give me a statistic about zoom meetings"""
 
 mindmap_tool = [{
   "type": "function",
@@ -57,71 +57,79 @@ mindmap_tool = [{
  , {"type": "web_search_preview"}]
 
 sampleMap = """{
-  "title": "Renewable Energy - Team Meeting",
+  "title": "Recreational.ai Pitch to YC",
   "id": 0,
   "childNodes": [
     {
       "id": 1,
-      "speaker": 0,
-      "content": "Solar Energy",
+      "speaker": 1,
+      "content": "What is Recreational.ai?",
       "childNodes": [
+        {
+          "id": 2,
+          "speaker": 1,
+          "content": "A web-app that listens to conversations and automatically visualizes key concepts using nodes and edges.",
+          "childNodes": []
+        },
+        {
+          "id": 3,
+          "speaker": 1,
+          "content": "Designed to run on a main meeting-room screen for all participants.",
+          "childNodes": []
+        },
         {
           "id": 4,
           "speaker": 1,
-          "content": "Installation progress",
-          "childNodes": [
-            {
-              "id": 10,
-              "speaker": 1,
-              "content": "Completed 5 new rooftops",
-              "childNodes": []
-            }
-          ]
+          "content": "Core benefit: Provides a real-time summary so you're never lost in a meeting.",
+          "childNodes": []
         }
       ]
     },
     {
-      "id": 2,
+      "id": 5,
       "speaker": 1,
-      "content": "Wind Power",
-      "childNodes": [
-        {
-          "id": 5,
-          "speaker": 0,
-          "content": "Site selection",
-          "childNodes": [
-            {
-              "id": 11,
-              "speaker": 0,
-              "content": "Review environmental impact",
-              "childNodes": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "speaker": 2,
-      "content": "Grid Integration",
+      "content": "Key Features",
       "childNodes": [
         {
           "id": 6,
           "speaker": 1,
-          "content": "Battery storage",
-          "childNodes": [
-            {
-              "id": 12,
-              "speaker": 1,
-              "content": "Evaluate new suppliers",
-              "childNodes": []
-            }
-          ]
+          "content": "Statistics Engine: Automatically searches the web for key statistics about the current conversation.",
+          "childNodes": []
+        },
+        {
+          "id": 7,
+          "speaker": 1,
+          "content": "Speaker Attribution: Uses speech diarization to identify and credit people for their ideas (e.g., colored nodes).",
+          "childNodes": []
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "speaker": 1,
+      "content": "Market & Vision",
+      "childNodes": [
+        {
+          "id": 9,
+          "speaker": 1,
+          "content": "Competitors like Zoom are stagnant and others like Otter.ai only help after the meeting.",
+          "childNodes": []
+        },
+        {
+          "id": 10,
+          "speaker": 1,
+          "content": "Identifies real-time assistance during meetings as a prime target for disruption.",
+          "childNodes": []
+        },
+        {
+          "id": 11,
+          "speaker": 1,
+          "content": "Future Goal: Scale up into a standalone video conferencing software.",
+          "childNodes": []
         }
       ]
     }
-  ]
-}"""
+  ]"""
 
 class addNodeAction():
     def __init__(self, content, speakerID, parentID):
@@ -139,6 +147,7 @@ def GPTCall(mindmapJSON) :
             ],
         tools=mindmap_tool
     )
+        print("GPT Response:", response)
         argumment = response.output[0].arguments
         
     
@@ -158,3 +167,5 @@ def GPTCall(mindmapJSON) :
 
     except json.decoder.JSONDecodeError :
         return None
+
+# GPTCall(sampleMap)
