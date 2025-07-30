@@ -388,7 +388,7 @@ def handle_demo(speech):
         })
         time.sleep(0.5)
         socketio.emit("node_instruction", {
-            "content": "Future Goal: Scale up into a standalone video conferencing software.",
+            "content": "In 2023, Zoom hosted over 3.3 trillion meeting minutes annually, reflecting its extensive use in virtual communications.",
             "action": "add",
             "type": "custom",
             "speakerID": str(0),
