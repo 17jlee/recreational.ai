@@ -37,6 +37,8 @@ dg_ws = None
 task_queue = queue.Queue()
 currentMindmap = mindmap.MindMap("")
 
+activationDict = {}
+
 def statisticsEngine():
     with mindmap_lock:
         print("No speech detected for 1 second. Running statisticsEngine...")
@@ -148,7 +150,9 @@ def handle_gpt_response(action, mindmap: mindmap.MindMap):
 
     
 def handle_demo(speech):
-    if "node" in speech.lower() or "nodes" in speech.lower():
+    if "recreational" in speech.lower() and activationDict.get("recreational") != True:
+        activationDict["recreational"] = True
+        time.sleep(2)
         print("Demo: Node detected")
         # Here you can add any specific logic for the demo
         # For example, you might want to emit a special event or log it
@@ -162,8 +166,9 @@ def handle_demo(speech):
                     "y": -83,
                     "id": str(1),  # Temporary ID for frontend
                 })
+    if ("visualizes" in speech.lower() or "visualises" in speech.lower()) and (activationDict.get("visualizes") != True):
+        activationDict["visualizes"] = True
         time.sleep(0.5)  # Simulate some processing time
-
         socketio.emit("node_instruction", {
                     "action": "add",
                     "content": "A web-app that listens to conversations and automatically visualizes key concepts using nodes and edges.",
@@ -175,7 +180,9 @@ def handle_demo(speech):
                     "id": str(2),  # Temporary ID for frontend
                 })
         
-    if "summary" in speech.lower():
+    if "room" in speech.lower() and activationDict.get("room") != True:
+        activationDict["room"] = True
+        time.sleep(2)
         socketio.emit("node_instruction", {
             "action": "delete",
             "parentID": str(2)
@@ -202,11 +209,12 @@ def handle_demo(speech):
                     "y": -275,
                     "id": str(4),  # Temporary ID for frontend
                 })
-        
-        
-    if "momentarily" in speech.lower():
+
+
+    if "summary" in speech.lower() and activationDict.get("summary") != True:
+        activationDict["summary"] = True
         print("Demo: University of Liverpool detected")
-        time.sleep(1.2)
+        time.sleep(2)
         socketio.emit("node_instruction", {
             "action": "delete",
             "parentID": str(3)
@@ -243,13 +251,13 @@ def handle_demo(speech):
                     "action": "add",
                     "content": "Core benefit: Provides a real-time summary so you're never lost in a meeting.",
                     "type": "topBottom",
-                    "speakerID": str(1),
+                    "speakerID": str(0),
                     "connectTo": str(1),
                     "x": 186,
                     "y": -275,
                     "id": str(7),  # Temporary ID for frontend
                 })
-        time.sleep(0.2)
+        time.sleep(2)
         socketio.emit("node_instruction", {
                     "action": "add",
                     "content": "Global video conferencing market size: $8.8 billion (2024), projected to reach $19.1 billion by 2029.",
@@ -260,25 +268,27 @@ def handle_demo(speech):
                     "y": -275,
                     "id": str(8),  # Temporary ID for frontend
                 })
-    if "engine" in speech.lower():
+    if "engine" in speech.lower() and activationDict.get("engine") != True:
+        activationDict["engine"] = True
         print("Demo: Engine detected")
-        time.sleep(2)
+        # time.sleep(2)
         socketio.emit("node_instruction", {
             "action": "add",
             "content": "Key Features",
             "type": "leftRight",
-            "speakerID": str(0),
+            "speakerID": str(1),
             "connectTo": str(0),
             "x": 250,
             "y": 0,
             "id": str(9),  # Temporary ID for frontend
         })
-        time.sleep(0.5)
+    if "speaker" in speech.lower() and activationDict.get("speaker") != True:
+        activationDict["speaker"] = True
         socketio.emit("node_instruction", {
             "action": "add",
             "content": "Statistics Engine: Automatically searches the web for key statistics about the current conversation.",
             "type": "leftRight",
-            "speakerID": str(0),
+            "speakerID": str(1),
             "connectTo": str(9),
             "x": 500,
             "y": -30,
@@ -293,7 +303,7 @@ def handle_demo(speech):
             "action": "add",
             "content": "Statistics Engine: Automatically searches the web for key statistics about the current conversation.",
             "type": "leftRight",
-            "speakerID": str(0),
+            "speakerID": str(1),
             "connectTo": str(9),
             "x": 500,
             "y": -155,
@@ -304,13 +314,13 @@ def handle_demo(speech):
             "action": "add",
             "content": "Speaker Attribution: Uses speech diarization to identify and credit people for their ideas (e.g., colored nodes).",
             "type": "leftRight",
-            "speakerID": str(0),
+            "speakerID": str(1),
             "connectTo": str(9),
             "x": 500,
             "y": -30,
             "id": str(12),  # Temporary ID for frontend
         })
-        time.sleep(1)
+        time.sleep(2.4)
         socketio.emit("node_instruction", {
             "action": "add",
             "content": "Unproductive meetings cost U.S. businesses approximately $399 billion each year.",
@@ -321,8 +331,9 @@ def handle_demo(speech):
             "y": 100,
             "id": str(13),  # Temporary ID for frontend
         })
-    
-    if "zoom" in speech.lower() :
+
+    if "zoom" in speech.lower() and activationDict.get("zoom") != True:
+        activationDict["zoom"] = True
         print("Demo: Zoom detected")
         time.sleep(3)
         socketio.emit("node_instruction", {
@@ -346,7 +357,9 @@ def handle_demo(speech):
             "y": 260,
             "id": str(15),  # Temporary ID for frontend
         })
-    if "disruption" in speech.lower() :
+
+    if "disruption" in speech.lower() and activationDict.get("disruption") != True:
+        activationDict["disruption"] = True
         print("Demo: Disruption detected")
         time.sleep(3)
         socketio.emit("node_instruction", {
@@ -397,156 +410,6 @@ def handle_demo(speech):
             "y": 260,
             "id": str(19),  # Temporary ID for frontend
         })
-
-    # if  "transcribe" in speech.lower() or "transcribes" in speech.lower():
-    #     print("Demo: Transcribe detected")
-    #     time.sleep(1.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Solution",
-    #         "type": "topDown",
-    #         "speakerID": str(1),
-    #         "connectTo": str(0),
-    #         "x": 0,
-    #         "y": 170,
-    #         "id": str(10),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Web-app that transcribes and visualises concepts in real time with a mind-map style",
-    #         "type": "topDown",
-    #         "speakerID": str(1),
-    #         "connectTo": str(10),
-    #         "x": 0,
-    #         "y": 300,
-    #         "id": str(11),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(2.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "delete",
-    #         "parentID": str(11)
-    #     })
-    #     time.sleep(0.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Web-app that transcribes and visualises concepts in real time with a mind-map style",
-    #         "type": "topDown",
-    #         "speakerID": str(1),
-    #         "connectTo": str(10),
-    #         "x": 125,
-    #         "y": 300,
-    #         "id": str(12),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.4)
-
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Automatically credits contributors and suggests key statistics",
-    #         "type": "topDown",
-    #         "speakerID": str(1),
-    #         "connectTo": str(10),
-    #         "x": -113,
-    #         "y": 300,
-    #         "id": str(13),  # Temporary ID for frontend
-    #     })
-    # if  "stack" in speech.lower() :
-    #     print("Demo: Stack detected")
-    #     time.sleep(1.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Technology Stack",
-    #         "type": "rightLeft",
-    #         "speakerID": str(1),
-    #         "connectTo": str(0),
-    #         "x": -280,
-    #         "y": 100,
-    #         "id": str(14),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Real-time transcription model",
-    #         "type": "rightLeft",
-    #         "speakerID": str(1),
-    #         "connectTo": str(14),
-    #         "x": -572,
-    #         "y": 80,
-    #         "id": str(15),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Agentic LLM to summarise, add nodes, and perform statistic searches",
-    #         "type": "rightLeft",
-    #         "speakerID": str(1),
-    #         "connectTo": str(14),
-    #         "x": -572,
-    #         "y": 213,
-    #         "id": str(16),  # Temporary ID for frontend
-    #     })
-    # if "Amazon" in speech:
-    #     print("Demo: Amazon detected")
-    #     time.sleep(1.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Amazon University Engagement Program",
-    #         "type": "rightLeft",
-    #         "speakerID": str(0),
-    #         "connectTo": str(0),
-    #         "x": -252,
-    #         "y": -5,
-    #         "id": str(17),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Mentored by an AWS team lead",
-    #         "type": "rightLeft",
-    #         "speakerID": str(0),
-    #         "connectTo": str(17),
-    #         "x": -565,
-    #         "y": -5,
-    #         "id": str(18),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", { 
-    #         "action": "add",
-    #         "content": "Validated market need through the program",
-    #         "type": "rightLeft",
-    #         "speakerID": str(0),
-    #         "connectTo": str(18),
-    #         "x": -836,
-    #         "y": -5,
-    #         "id": str(19),  # Temporary ID for frontend
-    #     })
-
-    # if "disrupt" in speech.lower() :
-    #     print("Demo: Disrupt detected")
-    #     time.sleep(1.2)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Mission",
-    #         "type": "bottomLeft",
-    #         "speakerID": str(0),
-    #         "connectTo": str(0),
-    #         "x": -285,
-    #         "y": -130,
-    #         "id": str(20),  # Temporary ID for frontend
-    #     })
-    #     time.sleep(0.5)
-    #     socketio.emit("node_instruction", {
-    #         "action": "add",
-    #         "content": "Disrupt legacy conferencing software and redefine how meetings are held",
-    #         "type": "rightLeft",
-    #         "speakerID": str(0),
-    #         "connectTo": str(20),
-    #         "x": -570,
-    #         "y": -147,
-    #         "id": str(21),  # Temporary ID for frontend
-    #     })
-
-        
 
 
 
