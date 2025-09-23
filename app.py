@@ -1,6 +1,5 @@
 import eventlet
 eventlet.monkey_patch()
-import sys
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from flask import Flask, send_from_directory
@@ -78,7 +77,7 @@ def gpt_worker():
         task_queue.task_done()
       
 threading.Thread(target=gpt_worker, daemon=True).start()
-threading.Thread(target=statistics_worker, daemon=True).start()
+# threading.Thread(target=statistics_worker, daemon=True).start()
 
 def chatGPTWrapper(speechList, mindmap: mindmap.MindMap, callback=None):
     try:
