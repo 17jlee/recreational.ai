@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative MindMap</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .room-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .mindmap {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            min-height: 300px;
+            background: #fafafa;
+        }
+        .node {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .node.speaker-1 {
+            border-left-color: #28a745;
+        }
+        .node.speaker-2 {
+            border-left-color: #dc3545;
+        }
+        .node.speaker-3 {
+            border-left-color: #ffc107;
+        }
+        .node.statistics {
+            border-left-color: #6f42c1;
+            background: #f8f7ff;
+        }
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .recording {
+            background: #dc3545 !important;
+        }
+        #logs {
+            background: #1e1e1e;
+            color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .room-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Collaborative MindMap</h1>
+        
+        <div class="room-controls">
+            <input type="text" id="roomCodeInput" placeholder="Enter room code" maxlength="6">
+            <button id="joinRoomBtn">Join Room</button>
+            <button id="createRoomBtn">Create New Room</button>
+            <button id="leaveRoomBtn" disabled>Leave Room</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        <div id="roomInfo" class="room-info" style="display: none;"></div>
+        
+        <div class="audio-controls">
+            <button id="startRecording" disabled>🎤 Start Recording</button>
+            <button id="stopRecording" disabled>⏹️ Stop Recording</button>
+            <span id="recordingStatus"></span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>MindMap</h2>
+        <div id="mindmap" class="mindmap">
+            <p>Join a room to start collaborating on a mindmap!</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>Debug Logs</h3>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        const socket = io();
+        let mediaRecorder = null;
+        let audioStream = null;
+        let isRecording = false;
+        let currentRoom = null;
+
+        // DOM elements
+        const roomCodeInput = document.getElementById('roomCodeInput');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const leaveRoomBtn = document.getElementById('leaveRoomBtn');
+        const status = document.getElementById('status');
+        const roomInfo = document.getElementById('roomInfo');
+        const mindmap = document.getElementById('mindmap');
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const logs = document.getElementById('logs');
+
+        // Utility functions
+        function showStatus(message, type = 'connected') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            log(`Status: ${message}`);
+        }
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateRoomInfo(info) {
+            if (info.room_code) {
+                roomInfo.innerHTML = `
+                    <strong>Room:</strong> ${info.room_code} | 
+                    <strong>Users:</strong> ${info.user_count}
+                `;
+                roomInfo.style.display = 'block';
+            } else {
+                roomInfo.style.display = 'none';
+            }
+        }
+
+        function addNodeToUI(nodeData) {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = `node speaker-${nodeData.speakerID}`;
+            if (nodeData.content.includes('StatisticsEngine:')) {
+                nodeDiv.className += ' statistics';
+            }
+            nodeDiv.innerHTML = `
+                <strong>Speaker ${nodeData.speakerID}:</strong> ${nodeData.content}
+                <small style="float: right;">ID: ${nodeData.id}</small>
+            `;
+            mindmap.appendChild(nodeDiv);
+        }
+
+        // Socket event handlers
+        socket.on('connection_status', (data) => {
+            showStatus(data.message);
+            log(`Connected with SID: ${data.sid}`);
+        });
+
+        socket.on('room_joined', (data) => {
+            currentRoom = data.room_code;
+            showStatus(`Successfully joined room ${data.room_code}`);
+            updateRoomInfo(data);
+            
+            // Clear mindmap and show current state
+            mindmap.innerHTML = '<h3>MindMap Contents:</h3>';
+            
+            // Enable recording controls
+            startRecordingBtn.disabled = false;
+            leaveRoomBtn.disabled = false;
+            joinRoomBtn.disabled = true;
+            createRoomBtn.disabled = true;
+            roomCodeInput.disabled = true;
+            
+            log(`Joined room ${data.room_code} with ${data.user_count} users`);
+        });
+
+        socket.on('room_left', (data) => {
+            currentRoom = null;
+            showStatus(data.message);
+            updateRoomInfo({});
+            
+            // Disable recording and reset UI
+            if (isRecording) {
+                stopRecording();
+            }
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = true;
+            leaveRoomBtn.disabled = true;
+            joinRoomBtn.disabled = false;
+            createRoomBtn.disabled = false;
+            roomCodeInput.disabled = false;
+            
+            mindmap.innerHTML = '<p>Join a room to start collaborating on a mindmap!</p>';
+            log('Left room');
+        });
+
+        socket.on('room_error', (data) => {
+            showStatus(data.error, 'error');
+        });
+
+        socket.on('user_joined', (data) => {
+            updateRoomInfo({room_code: currentRoom, user_count: data.user_count});
+            log(`User joined. Total users: ${data.user_count}`);
+        });
+
+        socket.on('user_left', (data) => {
+            updateRoomInfo({room_code: currentRoom, user_count: data.user_count});
+            log(`User left. Total users: ${data.user_count}`);
+        });
+
+        socket.on('node_instruction', (data) => {
+            log(`Node instruction: ${data.action} - ${data.content || 'N/A'}`);
+            
+            if (data.action === 'add') {
+                addNodeToUI(data);
+            }
+            // Handle other actions (modify, delete, setTitle) as needed
+        });
+
+        // Button event handlers
+        joinRoomBtn.addEventListener('click', () => {
+            const roomCode = roomCodeInput.value.trim().toUpperCase();
+            if (roomCode) {
+                socket.emit('join_room', { room_code: roomCode });
+            } else {
+                showStatus('Please enter a room code', 'error');
+            }
+        });
+
+        createRoomBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/create-room', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    roomCodeInput.value = data.room_code;
+                    socket.emit('join_room', { room_code: data.room_code });
+                } else {
+                    showStatus(`Failed to create room: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error creating room: ${error.message}`, 'error');
+            }
+        });
+
+        leaveRoomBtn.addEventListener('click', () => {
+            socket.emit('leave_room');
+        });
+
+        // Audio recording functions
+        async function startRecording() {
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(audioStream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0 && socket.connected) {
+                        // Convert to ArrayBuffer and send to server
+                        event.data.arrayBuffer().then(buffer => {
+                            socket.emit('audio_chunk', buffer);
+                        });
+                    }
+                };
+
+                mediaRecorder.start(100); // Send data every 100ms
+                isRecording = true;
+                
+                startRecordingBtn.disabled = true;
+                startRecordingBtn.classList.add('recording');
+                stopRecordingBtn.disabled = false;
+                recordingStatus.textContent = '🔴 Recording...';
+                
+                log('Started recording');
+            } catch (error) {
+                showStatus(`Failed to start recording: ${error.message}`, 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                audioStream.getTracks().forEach(track => track.stop());
+                
+                isRecording = false;
+                startRecordingBtn.disabled = false;
+                startRecordingBtn.classList.remove('recording');
+                stopRecordingBtn.disabled = true;
+                recordingStatus.textContent = '';
+                
+                log('Stopped recording');
+            }
+        }
+
+        startRecordingBtn.addEventListener('click', startRecording);
+        stopRecordingBtn.addEventListener('click', stopRecording);
+
+        // Allow Enter key to join room
+        roomCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinRoomBtn.click();
+            }
+        });
+
+        // Initialize
+        log('Application loaded');
+    </script>
+</body>
+</html>
