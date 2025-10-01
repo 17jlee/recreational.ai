@@ -1,15 +1,15 @@
 # session.py
 import queue
 import threading
-import mindmap
 import gptTools
 import mindmapMethods  # needed for action types
 
 class SessionState:
-    def __init__(self, sid, socketio):
+    def __init__(self, sid, socketio, room_manager):
         self.sid = sid
         self.socketio = socketio
-        self.mindmap = mindmap.MindMap("")
+        self.room_manager = room_manager
+        self.room = None  # Will be set when user joins a room
         self.task_queue = queue.Queue(maxsize=100)
         self._stop = threading.Event()
         self.gpt_thread = socketio.start_background_task(self._gpt_worker)
@@ -17,6 +17,13 @@ class SessionState:
         # Optional per-session resources managed by app.py:
         self.dg_ws = None
         self.speech_timer = None
+        self.dg_needs_reconnect = False  # Flag to indicate if Deepgram needs reconnection
+        self.dg_reconnecting = False  # Flag to prevent multiple simultaneous reconnections
+        self.dg_lock = threading.Lock()  # Lock for Deepgram operations
+        self.dg_retry_count = 0  # Track retry attempts
+        self.dg_last_attempt = 0  # Track last connection attempt time
+        self.dg_keepalive_timer = None  # Timer for sending keepalive messages
+        self.dg_last_audio_time = 0  # Track last audio data sent
 
     def enqueue_transcript(self, speech_list, transcript):
         try:
@@ -29,6 +36,11 @@ class SessionState:
                 pass
             self.task_queue.put_nowait((speech_list, transcript))
 
+    def join_room(self, room_code: str):
+        """Join this session to a room"""
+        self.room = self.room_manager.join_room(self.sid, room_code)
+        return self.room
+
     def _gpt_worker(self):
         while not self._stop.is_set():
             try:
@@ -37,56 +49,93 @@ class SessionState:
                 continue
             try:
                 speech_list, transcript = item
-                # Append transcript here (single place => no races)
-                self.mindmap.updateTranscript(str(transcript))
+                
+                # Only process if user is in a room
+                if not self.room:
+                    continue
+                    
+                # Append transcript to the room's shared mindmap (thread-safe)
+                self.room.update_transcript(str(transcript))
+                
+                # Get the current transcript and mindmap state (thread-safe)
+                current_transcript = self.room.mindmap.currentTranscript
+                mindmap_json = self.room.get_mindmap_json()
+                
                 action = gptTools.GPTCall(
                     speech_list,
-                    self.mindmap.currentTranscript,
-                    self.mindmap
+                    current_transcript,
+                    self.room.mindmap  # Pass the room's shared mindmap
                 )
                 if action:
                     self._handle_gpt_response(action)
+                    
+                # Reset statistics timer for the room
+                self.room.reset_statistics_timer(self.socketio)
+                    
             except Exception as e:
                 print(f"[{self.sid}] GPT worker error:", e)
             finally:
                 self.task_queue.task_done()
 
     def _handle_gpt_response(self, action):
+        if not self.room:
+            return
+            
+        room_code = self.room.room_code
         
         if isinstance(action, mindmapMethods.addNodeAction):
-            newID = self.mindmap.addNode(action.content, action.speakerID, action.parentID)
-            print("hit", self.sid)
+            # Use thread-safe method to add node to shared mindmap
+            newID = self.room.add_node_safe(action.content, action.speakerID, action.parentID)
+            print(f"[{self.sid}] Added node {newID} to room {room_code}")
+            
+            # Emit to all users in the room
             self.socketio.emit("node_instruction", {
                 "action": "add",
                 "content": action.content,
                 "speakerID": str(action.speakerID),
                 "connectTo": str(action.parentID),
                 "id": str(newID),
-            "sid": self.sid
-            }, to=self.sid, namespace="/")
+                "room_code": room_code,
+                "from_user": self.sid
+            }, room=room_code, namespace="/")
 
         elif isinstance(action, mindmapMethods.deleteNodeAction):
-            self.mindmap.delete_by_id(action.nodeID)
+            # Use thread-safe method to delete node from shared mindmap
+            self.room.delete_node_safe(action.nodeID)
+            
+            # Emit to all users in the room
             self.socketio.emit("node_instruction", {
                 "action": "delete",
-                "parentID": action.nodeID
-            }, room=self.sid)
+                "parentID": action.nodeID,
+                "room_code": room_code,
+                "from_user": self.sid
+            }, room=room_code)
 
         elif isinstance(action, mindmapMethods.modifyNodeAction):
-            self.mindmap.modify_by_id(action.newContent, action.newSpeakerID, action.nodeID)
+            # Use thread-safe method to modify node in shared mindmap
+            self.room.modify_node_safe(action.newContent, action.newSpeakerID, action.nodeID)
+            
+            # Emit to all users in the room
             self.socketio.emit("node_instruction", {
                 "action": "modify",
                 "newContent": action.newContent,
                 "newSpeakerID": action.newSpeakerID,
-                "nodeID": action.nodeID
-            }, room=self.sid)
+                "nodeID": action.nodeID,
+                "room_code": room_code,
+                "from_user": self.sid
+            }, room=room_code)
 
         elif isinstance(action, mindmapMethods.setTitle):
-            self.mindmap.title = action.newTitle
+            # Use thread-safe method to set title in shared mindmap
+            self.room.set_title_safe(action.newTitle)
+            
+            # Emit to all users in the room
             self.socketio.emit("node_instruction", {
                 "action": "setTitle",
-                "newTitle": action.newTitle
-            }, room=self.sid)
+                "newTitle": action.newTitle,
+                "room_code": room_code,
+                "from_user": self.sid
+            }, room=room_code)
 
         else:
             print(f"[{self.sid}] unknown action type: {type(action)}")
@@ -105,4 +154,13 @@ class SessionState:
                 self.speech_timer.cancel()
             except Exception:
                 pass
+        # Cancel keepalive timer
+        if self.dg_keepalive_timer:
+            try:
+                self.dg_keepalive_timer.cancel()
+            except Exception:
+                pass
+        # Leave room when session closes
+        if self.room_manager:
+            self.room_manager.leave_room(self.sid)
         # Deepgram WS is closed by app.py
