@@ -619,4 +619,19 @@ def handle_reconnect_audio():
     }, to=sid)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=2500)
+    # HTTPS configuration
+    ssl_context = None
+    cert_path = os.path.join(os.path.dirname(__file__), 'certs', 'cert.pem')
+    key_path = os.path.join(os.path.dirname(__file__), 'certs', 'key.pem')
+    
+    if os.path.exists(cert_path) and os.path.exists(key_path):
+        ssl_context = (cert_path, key_path)
+        print(f"✓ HTTPS enabled on port 2500")
+        print(f"  Certificate: {cert_path}")
+        print(f"  Key: {key_path}")
+    else:
+        print("⚠ Warning: SSL certificates not found. Running in HTTP mode.")
+        print(f"  Expected cert at: {cert_path}")
+        print(f"  Expected key at: {key_path}")
+    
+    socketio.run(app, host="0.0.0.0", port=2500, ssl_context=ssl_context)
