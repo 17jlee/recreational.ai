@@ -15,7 +15,7 @@ import threading
 import deepgramProcessing
 from flask_cors import CORS
 
-# from statisticsEngine import statisticsEngine as statisticsGPTEngine
+from statisticsEngine import statisticsEngine as statisticsGPTEngine
 from session import SessionState
 from room_manager import RoomManager
 
@@ -100,58 +100,6 @@ def chatGPTWrapper(speechList, mindmap: mindmap.MindMap, callback=None):
 
     except Exception as e:
         print("GPT Error:", e)
-
-# def handle_gpt_response(action, mindmap: mindmap.MindMap):
-#     # global currentMindmap
-#     """
-#     Handle the GPT response after it returns from OpenAI.
-#     You can emit to frontend, log, or trigger other backend logic here.
-#     """
-#     print(mindmap.to_json())
-
-
-#     if None:
-#         print("no action required")
-#     elif isinstance(action, mindmapMethods.addNodeAction): #add
-#         newID = mindmap.addNode(action.content, action.speakerID, action.parentID)
-       
-#         socketio.emit("node_instruction", {
-#             "action": "add",
-#             "content": action.content,
-#             "speakerID": str(action.speakerID),
-#             "connectTo": str(action.parentID),
-#             "id": str(newID),  # Temporary ID for frontend
-#         })
-
-#     elif isinstance(action, mindmapMethods.deleteNodeAction):#delete
-        
-#         mindmap.delete_by_id(action.nodeID)
-
-#         socketio.emit("node_instruction", {
-#             "action": "delete",
-#             "parentID": action.nodeID
-#         })
-
-#     elif isinstance(action, mindmapMethods.modifyNodeAction):#modify
-#         mindmap.modify_by_id(action.newContent, action.newSpeakerID, action.nodeID)
-
-#         socketio.emit("node_instruction", {
-#             "action": "modify",
-#             "newContent": action.newContent,
-#             "newSpeakerID": action.newSpeakerID,
-#             "nodeID": action.nodeID
-#         })
-        
-
-#     elif isinstance(action, mindmapMethods.setTitle): #settitle
-#         mindmap.title = action.newTitle
-#         socketio.emit("node_instruction", {
-#             "action": "setTitle",
-#             "newTitle": action.newTitle
-#         })
-       
-#     else :
-#         print("unknown action")
 
     
 
@@ -376,17 +324,25 @@ def handle_join_room(data):
         # Join the socket.io room for real-time updates
         join_room(room_code)
         
+        # Start the statistics timer if this is the first user in the room
+        # or if the timer isn't running
+        if room.statistics_timer is None or not room.statistics_timer.is_alive():
+            print(f"[{sid}] Starting statistics timer for room {room_code}")
+            room.reset_statistics_timer(socketio, timeout_secs=10.0)
+        
         # Connect to Deepgram now that user is in a room
         connect_to_deepgram(sid)
         
         # Send the current mindmap state to the new user
         mindmap_json = room.get_mindmap_json()
+        user_speaker_id = room.get_user_speaker_id(sid)
         
         socketio.emit("room_joined", {
             "room_code": room_code,
             "user_count": room.get_user_count(),
             "mindmap": json.loads(mindmap_json),
-            "message": f"Successfully joined room {room_code}"
+            "user_speaker_id": user_speaker_id,
+            "message": f"Successfully joined room {room_code} (Speaker ID: {user_speaker_id})"
         }, to=sid)
         
         # Notify other users in the room

@@ -4,12 +4,15 @@ import mindmap
 from typing import Dict, Set
 import uuid
 import queue
+from statisticsEngine import statisticsEngine as statisticsGPTEngine
 
 class Room:
     def __init__(self, room_code: str):
         self.room_code = room_code
         self.mindmap = mindmap.MindMap(f"Room {room_code} MindMap")
         self.users: Set[str] = set()  # Set of user session IDs
+        self.user_to_speaker_id: Dict[str, int] = {}  # Map user_sid to their speaker_id
+        self.next_speaker_id = 1  # Start assigning speaker IDs from 1
         self.mindmap_lock = threading.Lock()
         self.statistics_queue = queue.Queue()
         self.statistics_timer = None
@@ -17,10 +20,20 @@ class Room:
     def add_user(self, user_sid: str):
         """Add a user to this room"""
         self.users.add(user_sid)
+        # Assign a unique speaker ID to this user if they don't have one
+        if user_sid not in self.user_to_speaker_id:
+            self.user_to_speaker_id[user_sid] = self.next_speaker_id
+            self.next_speaker_id += 1
+            print(f"Assigned speaker ID {self.user_to_speaker_id[user_sid]} to user {user_sid}")
         
     def remove_user(self, user_sid: str):
         """Remove a user from this room"""
         self.users.discard(user_sid)
+        # Keep the speaker ID mapping even after user leaves for historical data
+        
+    def get_user_speaker_id(self, user_sid: str) -> int:
+        """Get the speaker ID for a user"""
+        return self.user_to_speaker_id.get(user_sid, 0)
         
     def get_user_count(self) -> int:
         """Get the number of users in this room"""
@@ -60,31 +73,36 @@ class Room:
         with self.mindmap_lock:
             return self.mindmap.to_json()
             
-    def reset_statistics_timer(self, socketio, timeout_secs=5.0):
+    def reset_statistics_timer(self, socketio, timeout_secs=10.0):
         """Reset the statistics timer for this room"""
         if self.statistics_timer is not None:
             self.statistics_timer.cancel()
         
         def run_statistics():
             try:
-                # TODO: Re-enable statistics engine once eventlet issues are resolved
                 print(f"Statistics timer triggered for room {self.room_code}")
-                # with self.mindmap_lock:
-                #     result = statisticsGPTEngine.GPTCall(self.mindmap.to_json())
-                #     if result and result.content:
-                #         new_id = self.mindmap.addNode(result.content, result.speakerID, result.parentID)
-                #         
-                #         # Emit to all users in the room
-                #         socketio.emit("node_instruction", {
-                #             "action": "add",
-                #             "content": "StatisticsEngine: " + result.content,
-                #             "speakerID": str(result.speakerID),
-                #             "connectTo": str(result.parentID),
-                #             "id": str(new_id),
-                #             "room_code": self.room_code
-                #         }, room=self.room_code)
+                with self.mindmap_lock:
+                    result = statisticsGPTEngine.GPTCall(self.mindmap.to_json())
+                    if result and result.content:
+                        new_id = self.mindmap.addNode(result.content, result.speakerID, result.parentID)
+                        
+                        # Emit to all users in the room
+                        socketio.emit("node_instruction", {
+                            "action": "add",
+                            "content": "StatisticsEngine: " + result.content,
+                            "speakerID": str(result.speakerID),
+                            "connectTo": str(result.parentID),
+                            "id": str(new_id),
+                            "room_code": self.room_code
+                        }, room=self.room_code)
+                
+                # Automatically reset the timer to run again in 10 seconds
+                self.reset_statistics_timer(socketio, timeout_secs=10.0)
+                
             except Exception as e:
                 print(f"Statistics Engine Error for room {self.room_code}:", e)
+                # Even on error, reset the timer to try again
+                self.reset_statistics_timer(socketio, timeout_secs=10.0)
                 
         self.statistics_timer = threading.Timer(timeout_secs, run_statistics)
         self.statistics_timer.start()
