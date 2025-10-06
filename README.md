@@ -4,13 +4,13 @@ This backend has been enhanced to support collaborative mindmapping with room co
 
 ## New Features
 
-### 🏠 Room-Based Collaboration
+### Room-Based Collaboration
 - **Room Codes**: Users join rooms using 6-character alphanumeric codes
 - **Shared MindMaps**: Each room has one shared mindmap that all users contribute to
 - **Real-time Sync**: All users in a room see updates instantly
 - **Concurrent Speech**: Multiple users can speak and transcribe simultaneously
 
-### 🔒 Thread-Safe Operations
+### Thread-Safe Operations
 - **Atomic Operations**: All mindmap modifications are thread-safe
 - **Race Condition Prevention**: Concurrent users won't corrupt the mindmap data
 - **Statistics Engine**: Per-room statistics engine that runs on speech timeouts
