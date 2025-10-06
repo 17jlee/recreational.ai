@@ -2,6 +2,8 @@
 
 This backend has been enhanced to support collaborative mindmapping with room codes. Multiple users can now join the same room and contribute to a shared mindmap in real-time, even while speaking simultaneously.
 
+Check out the demo at [recreational-ai.com](https://recreational-ai.com/app)
+
 ## New Features
 
 ### Room-Based Collaboration
